@@ -1,0 +1,4 @@
+interface:
+  display_name: "AgentReacher Social Publishing"
+  short_description: "Plan, schedule, and publish social campaigns"
+  default_prompt: "Use $agentreacher-social-publishing to turn this idea into a reviewed cross-platform campaign."

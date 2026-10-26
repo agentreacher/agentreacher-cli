@@ -1,0 +1,643 @@
+{
+	"server": {
+		"description": "AgentReacher MCP for connecting your AI to social media.",
+		"name": "agentreacher",
+		"title": "AgentReacher"
+	},
+	"tools": [
+		{
+			"name": "workspaceContext",
+			"title": "Workspace Context",
+			"description": "Return active workspace, available workspaces, current role, limits, timezone, subscription, and capability flags.",
+			"input": {
+				"type": "object",
+				"required": [],
+				"properties": {},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Workspace Context result."
+			}
+		},
+		{
+			"name": "workspaceAction",
+			"title": "Workspace Action",
+			"description": "Create, switch, or delete a workspace. Use workspaceContext first when the target workspace is ambiguous.",
+			"input": {
+				"type": "object",
+				"required": ["action"],
+				"properties": {
+					"action": {
+						"type": "string",
+						"enum": ["create", "switch", "delete"]
+					},
+					"workspaceId": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Workspace Action result."
+			}
+		},
+		{
+			"name": "integrationList",
+			"title": "Integration List",
+			"description": "Return connected social accounts/channels plus available providers for the active workspace.",
+			"input": {
+				"type": "object",
+				"required": [],
+				"properties": {},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Integration List result."
+			}
+		},
+		{
+			"name": "integrationConnect",
+			"title": "Integration Connect",
+			"description": "Start an OAuth or secure setup flow for a social provider. This returns an authorization action or URL and does not publish content.",
+			"input": {
+				"type": "object",
+				"required": ["provider"],
+				"properties": {
+					"provider": {
+						"type": "string",
+						"enum": [
+							"bluesky",
+							"instagram",
+							"facebook",
+							"x",
+							"youtube",
+							"tiktok",
+							"pinterest",
+							"linkedin",
+							"threads"
+						]
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Integration Connect result."
+			}
+		},
+		{
+			"name": "integrationDisconnect",
+			"title": "Integration Disconnect",
+			"description": "Disconnect a social account from the active workspace. Pass channelId when multiple accounts exist for the provider.",
+			"input": {
+				"type": "object",
+				"required": ["provider"],
+				"properties": {
+					"provider": {
+						"type": "string",
+						"enum": [
+							"bluesky",
+							"instagram",
+							"facebook",
+							"x",
+							"youtube",
+							"tiktok",
+							"pinterest",
+							"linkedin",
+							"threads"
+						]
+					},
+					"channelId": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Integration Disconnect result."
+			}
+		},
+		{
+			"name": "integrationAction",
+			"title": "Integration Action",
+			"description": "Run provider-specific helper actions such as listing or creating Pinterest boards.",
+			"input": {
+				"type": "object",
+				"required": ["provider", "action"],
+				"properties": {
+					"provider": {
+						"type": "string",
+						"enum": [
+							"bluesky",
+							"instagram",
+							"facebook",
+							"x",
+							"youtube",
+							"tiktok",
+							"pinterest",
+							"linkedin",
+							"threads"
+						]
+					},
+					"action": {
+						"type": "string",
+						"enum": ["list_boards", "create_board"]
+					},
+					"input": {
+						"type": "object",
+						"additionalProperties": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Integration Action result."
+			}
+		},
+		{
+			"name": "postSchema",
+			"title": "Post Schema",
+			"description": "Return platform-specific requirements, limits, supported config fields, missing required settings, and validation hints for selected targets and content type.",
+			"input": {
+				"type": "object",
+				"required": ["targets", "contentType"],
+				"properties": {
+					"targets": {
+						"type": "array",
+						"minItems": 1,
+						"items": {
+							"anyOf": [
+								{
+									"type": "string",
+									"enum": [
+										"bluesky",
+										"instagram",
+										"facebook",
+										"x",
+										"youtube",
+										"tiktok",
+										"pinterest",
+										"linkedin",
+										"threads"
+									]
+								},
+								{
+									"type": "object",
+									"additionalProperties": false,
+									"required": ["provider"],
+									"properties": {
+										"provider": {
+											"type": "string",
+											"enum": [
+												"bluesky",
+												"instagram",
+												"facebook",
+												"x",
+												"youtube",
+												"tiktok",
+												"pinterest",
+												"linkedin",
+												"threads"
+											]
+										},
+										"channelId": {
+											"type": "string"
+										}
+									}
+								}
+							]
+						}
+					},
+					"contentType": {
+						"type": "string",
+						"enum": ["text", "image", "video"]
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Post Schema result."
+			}
+		},
+		{
+			"name": "postCompose",
+			"title": "Post Compose",
+			"description": "Create or revise the planned post object. If postId is supplied, revise that post; otherwise create a draft or scheduled post.",
+			"input": {
+				"type": "object",
+				"required": ["mode", "content", "contentType", "targets"],
+				"properties": {
+					"postId": {
+						"type": "string"
+					},
+					"mode": {
+						"type": "string",
+						"enum": ["draft", "scheduled"]
+					},
+					"content": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["caption"],
+						"properties": {
+							"caption": {
+								"type": "string",
+								"description": "Exact caption text chosen by the user. May be empty only if the user explicitly wants no caption."
+							},
+							"brief": {
+								"type": "string"
+							}
+						}
+					},
+					"contentType": {
+						"type": "string",
+						"enum": ["text", "image", "video"]
+					},
+					"targets": {
+						"type": "array",
+						"minItems": 1,
+						"items": {
+							"anyOf": [
+								{
+									"type": "string",
+									"enum": [
+										"bluesky",
+										"instagram",
+										"facebook",
+										"x",
+										"youtube",
+										"tiktok",
+										"pinterest",
+										"linkedin",
+										"threads"
+									]
+								},
+								{
+									"type": "object",
+									"additionalProperties": false,
+									"required": ["provider"],
+									"properties": {
+										"provider": {
+											"type": "string",
+											"enum": [
+												"bluesky",
+												"instagram",
+												"facebook",
+												"x",
+												"youtube",
+												"tiktok",
+												"pinterest",
+												"linkedin",
+												"threads"
+											]
+										},
+										"channelId": {
+											"type": "string"
+										}
+									}
+								}
+							]
+						}
+					},
+					"media": {
+						"type": "object",
+						"additionalProperties": false,
+						"properties": {
+							"assetId": {
+								"type": "string"
+							},
+							"assetIds": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"platformConfig": {
+						"type": "object",
+						"additionalProperties": true,
+						"description": "Per-target or per-provider config such as pinterest.boardId, youtube.title, instagram alt text, TikTok privacy, or platform-specific text overrides."
+					},
+					"schedule": {
+						"type": "object",
+						"additionalProperties": false,
+						"properties": {
+							"scheduledAt": {
+								"type": "string",
+								"format": "date-time"
+							},
+							"perTarget": {
+								"type": "object",
+								"additionalProperties": {
+									"type": "string",
+									"format": "date-time"
+								}
+							}
+						}
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Post Compose result."
+			}
+		},
+		{
+			"name": "postPlan",
+			"title": "Post Plan",
+			"description": "Manage planned posts: list, inspect, revise, cancel, or delete without exposing database CRUD as separate tools.",
+			"input": {
+				"type": "object",
+				"required": ["goal"],
+				"properties": {
+					"goal": {
+						"type": "string",
+						"enum": ["list", "inspect", "revise", "cancel", "delete"]
+					},
+					"postId": {
+						"type": "string"
+					},
+					"filters": {
+						"type": "object",
+						"additionalProperties": false,
+						"properties": {
+							"status": {
+								"type": "string",
+								"enum": ["draft", "scheduled", "published", "failed"]
+							},
+							"limit": {
+								"type": "integer",
+								"minimum": 1,
+								"maximum": 100
+							}
+						}
+					},
+					"changes": {
+						"type": "object",
+						"additionalProperties": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Post Plan result."
+			}
+		},
+		{
+			"name": "postPublish",
+			"title": "Post Publish",
+			"description": "Publish now, resume a scheduled post, or retry failed targets. This is a high-intent external side-effect tool.",
+			"input": {
+				"type": "object",
+				"required": ["postId", "mode"],
+				"properties": {
+					"postId": {
+						"type": "string"
+					},
+					"mode": {
+						"type": "string",
+						"enum": ["now", "resume_scheduled", "retry_failed_targets"]
+					},
+					"targets": {
+						"type": "array",
+						"items": {
+							"anyOf": [
+								{
+									"type": "string",
+									"enum": [
+										"bluesky",
+										"instagram",
+										"facebook",
+										"x",
+										"youtube",
+										"tiktok",
+										"pinterest",
+										"linkedin",
+										"threads"
+									]
+								},
+								{
+									"type": "object",
+									"additionalProperties": false,
+									"required": ["provider"],
+									"properties": {
+										"provider": {
+											"type": "string",
+											"enum": [
+												"bluesky",
+												"instagram",
+												"facebook",
+												"x",
+												"youtube",
+												"tiktok",
+												"pinterest",
+												"linkedin",
+												"threads"
+											]
+										},
+										"channelId": {
+											"type": "string"
+										}
+									}
+								}
+							]
+						}
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Post Publish result."
+			}
+		},
+		{
+			"name": "postStatus",
+			"title": "Post Status",
+			"description": "Read-only post and delivery status inspection. Use postId for one post or omit it to inspect recent statuses.",
+			"input": {
+				"type": "object",
+				"required": [],
+				"properties": {
+					"postId": {
+						"type": "string"
+					},
+					"deliveryId": {
+						"type": "string"
+					},
+					"limit": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 100
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Post Status result."
+			}
+		},
+		{
+			"name": "mediaPrepare",
+			"title": "Media Prepare",
+			"description": "Import or prepare media for posting or the media library. Does not generate media.",
+			"input": {
+				"type": "object",
+				"required": ["source", "purpose"],
+				"properties": {
+					"purpose": {
+						"type": "string",
+						"enum": ["post_media", "library"]
+					},
+					"source": {
+						"oneOf": [
+							{
+								"type": "object",
+								"required": ["type", "url"],
+								"properties": {
+									"type": {
+										"const": "url"
+									},
+									"url": {
+										"type": "string",
+										"format": "uri"
+									}
+								}
+							},
+							{
+								"type": "object",
+								"required": ["type", "content", "contentType"],
+								"properties": {
+									"type": {
+										"const": "base64"
+									},
+									"content": {
+										"type": "string"
+									},
+									"contentType": {
+										"type": "string"
+									},
+									"filename": {
+										"type": "string"
+									}
+								}
+							},
+							{
+								"type": "object",
+								"required": [
+									"type",
+									"filename",
+									"contentType",
+									"fileSizeBytes"
+								],
+								"properties": {
+									"type": {
+										"const": "direct_upload"
+									},
+									"filename": {
+										"type": "string"
+									},
+									"contentType": {
+										"type": "string"
+									},
+									"fileSizeBytes": {
+										"type": "integer",
+										"minimum": 1
+									}
+								}
+							}
+						]
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Media Prepare result."
+			}
+		},
+		{
+			"name": "teamAction",
+			"title": "Team Action",
+			"description": "List members or invite a member to the active workspace.",
+			"input": {
+				"type": "object",
+				"required": ["action"],
+				"properties": {
+					"action": {
+						"type": "string",
+						"enum": ["list_members", "invite_member"]
+					},
+					"email": {
+						"type": "string",
+						"format": "email"
+					},
+					"role": {
+						"type": "string",
+						"enum": ["member", "admin"]
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Team Action result."
+			}
+		},
+		{
+			"name": "feedbackSend",
+			"title": "Feedback Send",
+			"description": "Send product feedback to the AgentReacher team.",
+			"input": {
+				"type": "object",
+				"required": ["message"],
+				"properties": {
+					"message": {
+						"type": "string",
+						"minLength": 10,
+						"maxLength": 4000
+					},
+					"category": {
+						"type": "string",
+						"enum": ["bug", "idea", "ux", "onboarding", "other"]
+					},
+					"contactEmail": {
+						"type": "string",
+						"format": "email"
+					}
+				},
+				"additionalProperties": false
+			},
+			"outputSchema": {
+				"type": "object",
+				"additionalProperties": true,
+				"description": "Feedback Send result."
+			}
+		}
+	]
+}

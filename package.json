@@ -1,0 +1,16 @@
+{
+  "name": "agentreacher",
+  "version": "0.18.0",
+  "description": "CLI and agent skill for planning, scheduling, and publishing social campaigns with AgentReacher.",
+  "type": "module",
+  "bin": { "agentreacher": "bin/agentreacher.mjs" },
+  "files": ["bin", "skills", "src/lib/agent-mcp-spec.json", "README.md", "LICENSE"],
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test", "prepublishOnly": "npm test" },
+  "keywords": ["agentreacher", "social-media", "ai-agent", "mcp", "scheduler", "instagram", "linkedin", "cli"],
+  "license": "MIT",
+  "homepage": "https://agentreacher.com/agent",
+  "repository": { "type": "git", "url": "git+https://github.com/agentreacher/agentreacher-cli.git" },
+  "bugs": { "url": "https://github.com/agentreacher/agentreacher-cli/issues" },
+  "dependencies": { "zod": "4.1.11" }
+}
